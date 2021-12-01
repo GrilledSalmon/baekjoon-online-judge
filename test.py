@@ -1,43 +1,24 @@
-import sys
-input = sys.stdin.readline
-M = int(input())
+M = 6
 
-S = set()
+set_1 = set([1])
+conn_left = []
 
-def add(x): S.add(x)
+conn_list = sorted([sorted(list(map(int, input().split()))) for _ in range(M)])
 
-def remove(x): S.discard(x)
-
-def check(x):
-    return print(1) if x in S else print(0)
-
-def toggle(x):
-    if x in S:
-        remove(x)
-    else:
-        add(x)
-
-def all(x):
-    S.update(range(1,21))
-
-def empty(x): S.clear()
-
-def operate(command, x):
-    func_dic = {
-        'add' : add,
-        'remove' : remove,
-        'check' : check,
-        'toggle' : toggle,
-        'all' : all,
-        'empty' : empty
-    }
-    func_dic[command](x)
-
-for _ in range(M):
-    try: 
-        inp = input().split()
-        command = inp[0]
-        x = int(inp[1])
-    except: x = None
+while True:
+    len_before = len(set_1)
+    print(conn_list)
+    for conn in conn_list:
+        n1, n2 = conn
+        if n1 in set_1 or n2 in set_1:
+            set_1.update([n1, n2])
+        else:
+            conn_left.append(conn)
     
-    operate(command, x)
+    # for문을 돌고 set_1의 변화가 없을 경우(추가로 1과 연결된 요소가 없을 경우)
+    if len_before == len(set_1): 
+        break
+    else: # 처음 loop에서 선택받지 못한 애들 다시 돌려주기(1과 연결될 수 있는 새로운 가능성이 있으므로)
+        conn_list = conn_left
+
+print(len(set_1) - 1)
