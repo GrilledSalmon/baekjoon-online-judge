@@ -1,8 +1,12 @@
-from collections import Counter
+from collections import deque
 
-lst = [1, 2, 3, 4, 3, 2, 2, 2, 1, 0]
+queue = deque()
 
-cnt = Counter(lst)
+queue.append('윤우')
+queue.append('지용')
+queue.append('기주')
 
-for i in cnt.keys():
-    print(i, cnt[i])
+print(queue)
+print(queue[0])
+print(queue[1])
+print(queue.popleft())
