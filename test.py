@@ -1,43 +1,70 @@
-import sys
-input = sys.stdin.readline
+N = input()
+M = int(input())
+brk_buttons = list(map(int, input().split())) if M else []
 
-N, M = map(int, input().split())
-paper = [list(map(int, input().split())) for _ in range(N)]
-
-def check_coord(x, y, pre_root_):
-    """경계조건, 이전 root가 아닌 조건을 충족하는지 확인"""
-    if 0 <= x < M and 0 <= y < N and (x, y) != pre_root_:
+def possible(num:str, butt_set:set):
+    """num을 butt_set에 있는 수로 만들 수 있는지 확인"""
+    if num is None:
         return True
-    return False
+    for s in num:
+        if int(s) not in butt_set:
+            return False
+    return True
 
-maxi = [0]
-def dfs_like(root:tuple, pre_root_=None, sum_=0, level_=0):
-    x, y = root
-    sum_ += paper[y][x]
-    level_ += 1
-    if level_== 4:
-        if maxi[0] < sum_:
-            maxi[0] = sum_
-            # print(root, pre_root_, sum_)
-        return
 
-    coords = [(x, y-1), (x, y+1), (x-1, y), (x+1, y)] # 상하좌우
-    for new_x, new_y in coords:
-        if check_coord(new_x, new_y, pre_root_):
-            dfs_like((new_x, new_y), root, sum_, level_)
+# 살아 있는 버튼으로 가장 비슷한 수 만들기
+def sim_num_fun() -> tuple:
+    """살아 있는 버튼으로 만들 수 있는 N과 가장 가까운 수 리턴"""
+    butt_set = {i for i in range(10) if i not in brk_buttons}
+    max_butt, min_butt = max(butt_set), min(butt_set)
+    sim_num_list = []
+    print(N, butt_set)
+    for i, n in enumerate(N):
+        if int(n) in butt_set:
+            sim_num_list.append(n)
+        else:
+            unders = [b for b in butt_set if b < int(n)] # 더 작은 버튼들
+            overs = [b for b in butt_set if b > int(n)] # 더 큰 버튼들
+            closest_under = str(max(unders)) if unders else None # 버튼이 없는 경우 고려
+            closest_over = str(min(overs)) if overs else None
+            
+            prev_num = int(''.join(sim_num_list)) if sim_num_list else None # sim_num_list가 비어 있는 경우 고려
+            if closest_under is None:
+                sim_num_1 = ''.join(sim_num_list) + closest_over + str(min_butt)*(len(N)-i-1)
+                temp = str(prev_num - 1) if prev_num is not None else None
+                if temp is None:
+                    if len(N) == 1:
+                        sim_num_2 = '100000'
+                    else:
+                        sim_num_2 = str(max_butt)*(len(N)-i-1)
+                elif temp == '0':
+                    sim_num_2 = str(max_butt)*(len(N)-i)
+                elif possible(temp, butt_set):
+                    sim_num_2 = temp + str(max_butt)*(len(N)-i)
+                else:
+                    sim_num_2 = sim_num_1
+            elif closest_over is None:
+                sim_num_1 = ''.join(sim_num_list) + closest_under + str(max_butt)*(len(N)-i-1)
+                temp = str(prev_num + 1) if prev_num else '1'
+                if possible(temp, butt_set):
+                    sim_num_2 = temp + str(min_butt)*(len(N)-i)
+                else:
+                    sim_num_2 = sim_num_1
+            else: # 둘 다 존재(둘 다 없을 수 는 없음)
+                sim_num_1 = ''.join(sim_num_list) + closest_under + str(max_butt)*(len(N)-i-1)
+                sim_num_2 = ''.join(sim_num_list) + closest_over + str(min_butt)*(len(N)-i-1)
+            print(sim_num_1, sim_num_2)
+            return int(sim_num_1), int(sim_num_2)
+    sim_num = int(''.join(sim_num_list))
+    return sim_num, sim_num
+    
 
-    if level_ == 2: # 학교 모양
-        for i in range(3):
-            c1 = coords[i]
-            if check_coord(c1[0], c1[1], pre_root_):
-                for j in range(i+1, 4):
-                    c2 = coords[j]
-                    if check_coord(c2[0], c2[1], pre_root_):
-                        temp_sum = sum_ + paper[c1[1]][c1[0]] + paper[c2[1]][c2[0]]
-                        if maxi[0] < temp_sum:
-                            maxi[0] = temp_sum
-
-for y in range(N):
-    for x in range(M):
-        dfs_like((x, y))
-print(maxi[0])
+if M == 10: # 버튼 다 고장난 경우
+    print(abs(100-int(N)))
+else:
+    sim_num_1, sim_num_2 = sim_num_fun()
+    print(sim_num_1, sim_num_2)
+    candi_1 = abs(sim_num_1 - int(N)) + len(str(sim_num_1))
+    candi_2 = abs(sim_num_2 - int(N)) + len(str(sim_num_2))
+    candi_3 = abs(100 - int(N))
+    print(min([candi_1, candi_2, candi_3]))
