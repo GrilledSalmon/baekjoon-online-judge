@@ -1,15 +1,11 @@
-import sys
-input = sys.stdin.readline
+import re
+N, M = int(input()), int(input())
+S = input()
 
-def solve():
-    k_set = {x + p*M for p in range(N)}
-    for q in range(M):
-        k = y + q*N
-        if k in k_set:
-            return k
-    return -1
-
-T = int(input())
-for _ in range(T):
-    M, N, x, y = map(int, input().split())
-    print(solve())
+p_n = 'I' + 'OI'*N
+regex = re.compile(f'{p_n}(OI)*')
+ans = 0
+for r in re.finditer(regex, S):
+    l = (len(r.group()) - 1) // 2
+    ans += l - N + 1
+print(ans)
