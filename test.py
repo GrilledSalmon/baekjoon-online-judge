@@ -1,39 +1,17 @@
 import sys
 input = sys.stdin.readline
 
-def print_list(ls):
-    print('[' + ','.join(map(str, ls)) + ']')
+n = int(input())
+tri = [tuple(map(lambda x: [int(x), None], input().split())) for _ in range(n)]
 
-def solve():
-    p = input().rstrip()
-    n = int(input())
-    try:
-        nums = list(map(int, input().strip('[]\n').split(',')))
-    except ValueError:
-        nums = []
+def solve(lev=0, i=0):
+    """lev : 트리의 층(뿌리가 0층)
+       i   : lev층 리스트의 인덱스"""
+    if lev == n-1: # leaf 도달
+        return tri[lev][i][0]
+    if tri[lev][i][1] is None:
+        now = tri[lev][i][0]
+        tri[lev][i][1] = max((now + solve(lev+1, i), now + solve(lev+1, i+1)))
+    return tri[lev][i][1]
 
-    rev = 0
-    s, e = 0, n
-    for command in p:
-        if command == 'R':
-            rev = 1-rev
-        else:
-            if rev: # 뒤집어졌으면
-                e -= 1
-            else: # 똑바로 돼 있으면
-                s += 1
-        if s > e:
-            print('error')
-            return
-    if rev:
-        if s == 0:
-            print_list(nums[e-1::-1])
-        else:
-            print_list(nums[e-1:s-1:-1])
-    else:
-        print_list(nums[s:e])
-    return
-
-T = int(input())
-for _ in range(T):
-    solve()
+print(solve())
